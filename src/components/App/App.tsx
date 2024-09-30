@@ -23,13 +23,67 @@ export default function App() {
 
   useEffect(() => {
     loadTasks();
+    console.log('READ');
   }, [loadTasks]);
+
+  const [label, setLabel] = useState<{
+    [k: string]: FormDataEntryValue;
+  }>();
+
+  const createTask = useCallback(
+    async (data: { [k: string]: FormDataEntryValue }) => {
+      try {
+        const response = await fetch('http://localhost:3000/tasks', {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        const tasks = await response.json();
+
+        setTasks(tasks);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (label) {
+      createTask(label);
+      console.log('CREATE');
+    }
+  }, [label]);
+
+  const [taskToDelete, setTaskToDelete] = useState<number>();
+
+  const destroyTask = useCallback(async (id: number) => {
+    try {
+      const response = await fetch(`http://localhost:3000/tasks/${id}`, {
+        method: 'DELETE',
+      });
+
+      const tasks = await response.json();
+
+      setTasks(tasks);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (taskToDelete) {
+      destroyTask(taskToDelete);
+      console.log('DELETE');
+    }
+  }, [taskToDelete]);
 
   return (
     <div className="app">
-      <Form />
+      <Form setLabel={setLabel} />
       <Counter />
-      <List tasks={tasks} isLoader={isLoader} />
+      <List tasks={tasks} isLoader={isLoader} destroy={setTaskToDelete} />
     </div>
   );
 }
