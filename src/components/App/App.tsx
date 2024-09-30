@@ -58,7 +58,7 @@ export default function App() {
       createTask(label);
       console.log('CREATE');
     }
-  }, [label]);
+  }, [createTask, label]);
 
   // --- suppression d'une tâche ---
 
@@ -83,49 +83,15 @@ export default function App() {
       destroyTask(taskToDelete);
       console.log('DELETE');
     }
-  }, [taskToDelete]);
+  }, [destroyTask, taskToDelete]);
 
-  // --- mise à jour d'une tâche (tâche effectuée) ---
-
-  const [isChecked, setIsChecked] = useState(false);
-  const [taskToUpdate, setTaskToUpdate] = useState<number>(0);
-
-  const data = {
-    done: isChecked,
-  };
-
-  const updateTask = useCallback(async (id: number, data) => {
-    try {
-      const response = await fetch(`http://localhost:3000/tasks/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-        // headers: { 'Content-Type': 'application/json' },
-      });
-
-      const updatedTask = await response.json();
-      console.log('TASK : ', updatedTask);
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (taskToUpdate > 0) {
-      updateTask(taskToUpdate, data);
-    }
-  }, [taskToUpdate]);
+  // --- comptage du nombre de tâches en cours ---
 
   return (
     <div className="app">
       <Form setLabel={setLabel} />
-      <Counter />
-      <List
-        tasks={tasks}
-        isLoader={isLoader}
-        destroy={setTaskToDelete}
-        update={setTaskToUpdate}
-        setIsChecked={setIsChecked}
-      />
+      <Counter tasks={tasks} />
+      <List tasks={tasks} isLoader={isLoader} destroy={setTaskToDelete} />
     </div>
   );
 }
